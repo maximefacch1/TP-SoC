@@ -9,12 +9,13 @@
  </systemtable>
  <clocktable>
   <columns>
-   <clockname preferredWidth="548" />
-   <clocksource preferredWidth="548" />
-   <frequency preferredWidth="528" />
+   <clockname preferredWidth="419" />
+   <clocksource preferredWidth="419" />
+   <frequency preferredWidth="404" />
   </columns>
  </clocktable>
- <library expandedCategories="Library,Project/System,Project,Project/MyIP" />
+ <library
+   expandedCategories="Project,Library,Library/DSP,Library/University Program/Generic IO,Library/DSP/Video and Image Processing,Library/University Program" />
  <window width="1920" height="1152" x="0" y="0" />
  <generation path="nios_system" synthesis="VHDL" />
  <hdlexample language="VHDL" />
