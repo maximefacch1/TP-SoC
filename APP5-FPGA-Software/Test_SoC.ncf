@@ -20,7 +20,7 @@
         <type>C</type>
         <options>
             <source_files>
-                <source_file filepath="true">Ligne.c</source_file>
+                <source_file filepath="true">Code.c</source_file>
             </source_files>
             <compiler_flags>-g -O1 -ffunction-sections -fverbose-asm -fno-inline</compiler_flags>
             <emulate_unimpl_instructions>true</emulate_unimpl_instructions>

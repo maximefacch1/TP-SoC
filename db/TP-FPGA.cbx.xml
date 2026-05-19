@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<LOG_ROOT>
+	<PROJECT NAME="TP-FPGA">
+		<CBX_INST_ENTRY INSTANCE_NAME="|Top_VHDL|system:u0|system_clocks:clocks|altpll:DE_Clock_Generator_Audio" CBX_FILE_NAME="altpll_vpb2.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Top_VHDL|system:u0|system_jtag_uart:jtag_uart|system_jtag_uart_scfifo_r:the_system_jtag_uart_scfifo_r|scfifo:rfifo" CBX_FILE_NAME="scfifo_jr21.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Top_VHDL|system:u0|system_onchip_memory:onchip_memory|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_4qc1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Top_VHDL|system:u0|system_clocks:clocks|altpll:DE_Clock_Generator_System" CBX_FILE_NAME="altpll_6rb2.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Top_VHDL|system:u0|system_jtag_uart:jtag_uart|system_jtag_uart_scfifo_w:the_system_jtag_uart_scfifo_w|scfifo:wfifo" CBX_FILE_NAME="scfifo_jr21.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Top_VHDL|system:u0|system_nios2_processor:nios2_processor|system_nios2_processor_nios2_oci:the_system_nios2_processor_nios2_oci|system_nios2_processor_nios2_ocimem:the_system_nios2_processor_nios2_ocimem|system_nios2_processor_ociram_sp_ram_module:system_nios2_processor_ociram_sp_ram|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_cn81.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Top_VHDL|system:u0|system_nios2_processor:nios2_processor|system_nios2_processor_register_bank_a_module:system_nios2_processor_register_bank_a|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_8ah1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Top_VHDL|system:u0|system_nios2_processor:nios2_processor|system_nios2_processor_register_bank_b_module:system_nios2_processor_register_bank_b|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_9ah1.tdf"/>
+	</PROJECT>
+</LOG_ROOT>

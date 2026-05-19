@@ -1,0 +1,16 @@
+Fitter Status : Successful - Tue May 19 12:15:25 2026
+Quartus II 32-bit Version : 13.0.1 Build 232 06/12/2013 SP 1 SJ Full Version
+Revision Name : TP-FPGA
+Top-level Entity Name : Top_VHDL
+Family : Cyclone IV E
+Device : EP4CE22F17C6
+Timing Models : Final
+Total logic elements : 2,851 / 22,320 ( 13 % )
+    Total combinational functions : 2,541 / 22,320 ( 11 % )
+    Dedicated logic registers : 1,765 / 22,320 ( 8 % )
+Total registers : 1834
+Total pins : 134 / 154 ( 87 % )
+Total virtual pins : 0
+Total memory bits : 44,032 / 608,256 ( 7 % )
+Embedded Multiplier 9-bit elements : 0 / 132 ( 0 % )
+Total PLLs : 1 / 4 ( 25 % )
