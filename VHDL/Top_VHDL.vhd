@@ -11,9 +11,9 @@ entity Top_VHDL is
         --------------------------------------------------------------------
         -- LED / KEY / SWITCH
         --------------------------------------------------------------------
-		  LED : out std_logic_vector(7 downto 0);
-        KEY  : in  std_logic_vector(1 downto 0);
-        SW   : in  std_logic_vector(3 downto 0);
+        LED : out std_logic_vector(7 downto 0);
+        KEY : in  std_logic_vector(1 downto 0);
+        SW  : in  std_logic_vector(3 downto 0);
 
         --------------------------------------------------------------------
         -- SDRAM DE0-Nano
@@ -30,7 +30,7 @@ entity Top_VHDL is
         DRAM_WE_N  : out   std_logic;
 
         --------------------------------------------------------------------
-        -- GPIO0 : utilisé pour CuteCar
+        -- GPIO0 : CuteCar
         --------------------------------------------------------------------
         GPIO_0_IN : in    std_logic_vector(1 downto 0);
         GPIO_0    : inout std_logic_vector(33 downto 0);
@@ -42,18 +42,16 @@ entity Top_VHDL is
         GPIO_1    : inout std_logic_vector(33 downto 0);
 
         --------------------------------------------------------------------
-        -- GPIO2 : non utilisé ici
-     --------------------------------------------------------------------
         -- Périphériques DE0-Nano non utilisés ici
         --------------------------------------------------------------------
-        I2C_SCLK       : inout std_logic;
-        I2C_SDAT       : inout std_logic;
-        G_SENSOR_CS_N  : out   std_logic;
-        G_SENSOR_INT   : in    std_logic;
-        ADC_CS_N       : out   std_logic;
-        ADC_SADDR      : out   std_logic;
-        ADC_SCLK       : out   std_logic;
-        ADC_SDAT       : in    std_logic
+        I2C_SCLK      : inout std_logic;
+        I2C_SDAT      : inout std_logic;
+        G_SENSOR_CS_N : out   std_logic;
+        G_SENSOR_INT  : in    std_logic;
+        ADC_CS_N      : out   std_logic;
+        ADC_SADDR     : out   std_logic;
+        ADC_SCLK      : out   std_logic;
+        ADC_SDAT      : in    std_logic
     );
 end entity Top_VHDL;
 
@@ -86,7 +84,13 @@ architecture rtl of Top_VHDL is
             pwm_mtrl_p_export      : out   std_logic;
             pwm_mtrl_n_export      : out   std_logic;
             pwm_mtr_sleep_n_export : out   std_logic;
-            pwm_mtr_fault_n_export : in    std_logic := 'X'
+            pwm_mtr_fault_n_export : in    std_logic := 'X';
+
+            adc_convst_export      : out   std_logic;
+            adc_sck_export         : out   std_logic;
+            adc_sdo_export         : in    std_logic := 'X';
+            adc_sdi_export         : out   std_logic;
+            ir_led_on_export       : out   std_logic
         );
     end component system;
 
@@ -94,6 +98,12 @@ architecture rtl of Top_VHDL is
     -- Signaux internes
     --------------------------------------------------------------------
     signal switches_qsys : std_logic_vector(7 downto 0);
+
+    -- Debug LED :
+    -- Les LEDs 0 à 6 restent pilotées par Qsys.
+    -- LED(7) affiche directement ir_led_on_export.
+    signal led_qsys      : std_logic_vector(7 downto 0);
+    signal ir_led_on_sig : std_logic;
 
 begin
 
@@ -104,6 +114,12 @@ begin
     switches_qsys <= "0000" & SW;
 
     --------------------------------------------------------------------
+    -- Debug de IR_LED_ON
+    --------------------------------------------------------------------
+    LED(6 downto 0) <= led_qsys(6 downto 0);
+    LED(7)          <= ir_led_on_sig;
+
+    --------------------------------------------------------------------
     -- Désactivation propre des périphériques non utilisés
     --------------------------------------------------------------------
     I2C_SCLK <= 'Z';
@@ -111,20 +127,37 @@ begin
 
     G_SENSOR_CS_N <= '1';
 
+    --------------------------------------------------------------------
+    -- ADC interne DE0-Nano non utilisé.
+    -- Attention : ceci est différent de l'ADC CuteCar branché sur GPIO0.
+    --------------------------------------------------------------------
     ADC_CS_N  <= '1';
     ADC_SADDR <= '0';
     ADC_SCLK  <= '0';
 
     --------------------------------------------------------------------
     -- GPIO non utilisés en haute impédance
-    -- Attention : GPIO_0(2..7) sont utilisés par CuteCar.
+    --
+    -- GPIO_0 utilisés par CuteCar :
+    --
+    -- Moteurs :
+    -- GPIO_0(2)  = MTRR_N
+    -- GPIO_0(3)  = MTRR_P
+    -- GPIO_0(4)  = MTRL_P
+    -- GPIO_0(5)  = MTRL_N
+    -- GPIO_0(6)  = MTR_Sleep_n
+    -- GPIO_0(7)  = MTR_Fault_n
+    --
+    -- ADC capteurs :
+    -- GPIO_0(8)  = ADC_CONVST
+    -- GPIO_0(9)  = ADC_SCK
+    -- GPIO_0(10) = ADC_SDO
+    -- GPIO_0(11) = ADC_SDI
+    -- GPIO_0(32) = IR_LED_ON
     --------------------------------------------------------------------
     GPIO_0(0)  <= 'Z';
     GPIO_0(1)  <= 'Z';
-    GPIO_0(8)  <= 'Z';
-    GPIO_0(9)  <= 'Z';
-    GPIO_0(10) <= 'Z';
-    GPIO_0(11) <= 'Z';
+
     GPIO_0(12) <= 'Z';
     GPIO_0(13) <= 'Z';
     GPIO_0(14) <= 'Z';
@@ -145,10 +178,17 @@ begin
     GPIO_0(29) <= 'Z';
     GPIO_0(30) <= 'Z';
     GPIO_0(31) <= 'Z';
-    GPIO_0(32) <= 'Z';
-    GPIO_0(33) <= 'Z';
+    GPIO_0(33) <= '0'; -- VCC3P3_PWRON_n actif bas : active le 3.3 V SCD
 
     GPIO_1 <= (others => 'Z');
+
+    --------------------------------------------------------------------
+    -- Sortie physique IR_LED_ON
+    -- Le même signal est envoyé :
+    -- - vers GPIO_0(32), donc la carte CuteCar ;
+    -- - vers LED(7), pour debug visuel.
+    --------------------------------------------------------------------
+    GPIO_0(32) <= ir_led_on_sig;
 
     --------------------------------------------------------------------
     -- Instanciation du système Qsys
@@ -158,7 +198,7 @@ begin
             ----------------------------------------------------------------
             -- Debug simple
             ----------------------------------------------------------------
-				leds_export => LED,
+            leds_export     => led_qsys,
             switches_export => switches_qsys,
 
             ----------------------------------------------------------------
@@ -184,21 +224,22 @@ begin
 
             ----------------------------------------------------------------
             -- IP PWM moteur CuteCar sur GPIO0
-            --
-            -- Mapping DE0-Nano / CuteCar :
-            -- GPIO_0(2) = PIN_A2 = MTRR_N
-            -- GPIO_0(3) = PIN_A3 = MTRR_P
-            -- GPIO_0(4) = PIN_B3 = MTRL_P
-            -- GPIO_0(5) = PIN_B4 = MTRL_N
-            -- GPIO_0(6) = PIN_A4 = MTR_Sleep_n
-            -- GPIO_0(7) = PIN_B5 = MTR_Fault_n
             ----------------------------------------------------------------
             pwm_mtrr_p_export      => GPIO_0(3),
             pwm_mtrr_n_export      => GPIO_0(2),
             pwm_mtrl_p_export      => GPIO_0(4),
             pwm_mtrl_n_export      => GPIO_0(5),
             pwm_mtr_sleep_n_export => GPIO_0(6),
-            pwm_mtr_fault_n_export => GPIO_0(7)
+            pwm_mtr_fault_n_export => GPIO_0(7),
+
+            ----------------------------------------------------------------
+            -- IP ADC LTC2308 CuteCar sur GPIO0
+            ----------------------------------------------------------------
+            adc_convst_export => GPIO_0(8),
+            adc_sck_export    => GPIO_0(9),
+				adc_sdo_export    => GPIO_0(10),
+            adc_sdi_export    => GPIO_0(11),
+            ir_led_on_export  => ir_led_on_sig
         );
 
 end architecture rtl;

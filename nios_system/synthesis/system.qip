@@ -2,7 +2,7 @@ set_global_assignment -entity "system" -library "system" -name IP_TOOL_NAME "Qsy
 set_global_assignment -entity "system" -library "system" -name IP_TOOL_VERSION "13.0sp1"
 set_global_assignment -entity "system" -library "system" -name IP_TOOL_ENV "Qsys"
 set_global_assignment -library "system" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../system.sopcinfo"]
-set_instance_assignment -entity "system" -library "system" -name SLD_INFO "QSYS_NAME system HAS_SOPCINFO 1 GENERATION_ID 1779092869"
+set_instance_assignment -entity "system" -library "system" -name SLD_INFO "QSYS_NAME system HAS_SOPCINFO 1 GENERATION_ID 1779182318"
 set_global_assignment -library "system" -name MISC_FILE [file join $::quartus(qip_path) "../../system.cmp"]
 set_global_assignment -name SYNTHESIS_ONLY_QIP ON
 set_global_assignment -library "system" -name MISC_FILE [file join $::quartus(qip_path) "../../system.qsys"]
@@ -24,6 +24,7 @@ set_global_assignment -library "system" -name VHDL_FILE [file join $::quartus(qi
 set_global_assignment -library "system" -name VHDL_FILE [file join $::quartus(qip_path) "system_leds_s1_translator.vhd"]
 set_global_assignment -library "system" -name VHDL_FILE [file join $::quartus(qip_path) "system_switches_s1_translator.vhd"]
 set_global_assignment -library "system" -name VHDL_FILE [file join $::quartus(qip_path) "system_ip_pwm_motor_0_avalon_slave_0_translator.vhd"]
+set_global_assignment -library "system" -name VHDL_FILE [file join $::quartus(qip_path) "system_ip_ltc2308_adc_0_avalon_slave_0_translator.vhd"]
 set_global_assignment -library "system" -name VHDL_FILE [file join $::quartus(qip_path) "system_rst_controller.vhd"]
 set_global_assignment -library "system" -name VHDL_FILE [file join $::quartus(qip_path) "system_rst_controller_001.vhd"]
 set_global_assignment -library "system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/system_irq_mapper.sv"]
@@ -52,6 +53,7 @@ set_global_assignment -library "system" -name SYSTEMVERILOG_FILE [file join $::q
 set_global_assignment -library "system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_master_agent.sv"]
 set_global_assignment -library "system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_slave_translator.sv"]
 set_global_assignment -library "system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_master_translator.sv"]
+set_global_assignment -library "system" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/ip_ltc2308_adc.vhd"]
 set_global_assignment -library "system" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/ip_pwm_motor.vhd"]
 set_global_assignment -library "system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/system_clocks.v"]
 set_global_assignment -library "system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/system_sdram.v"]

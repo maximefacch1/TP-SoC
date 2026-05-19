@@ -46,6 +46,19 @@
          type = "String";
       }
    }
+   element ip_ltc2308_adc_0.avalon_slave_0
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "64";
+         type = "String";
+      }
+   }
    element clk_0
    {
       datum _sortIndex
@@ -64,6 +77,14 @@
       datum _sortIndex
       {
          value = "7";
+         type = "int";
+      }
+   }
+   element ip_ltc2308_adc_0
+   {
+      datum _sortIndex
+      {
+         value = "9";
          type = "int";
       }
    }
@@ -125,19 +146,6 @@
          type = "String";
       }
    }
-   element LEDS.s1
-   {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "67121168";
-         type = "String";
-      }
-   }
    element onchip_memory.s1
    {
       datum _lockedAddress
@@ -148,6 +156,19 @@
       datum baseAddress
       {
          value = "67112960";
+         type = "String";
+      }
+   }
+   element LEDS.s1
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "67121168";
          type = "String";
       }
    }
@@ -195,7 +216,7 @@
  <parameter name="projectName" value="TP-FPGA.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1779089599203" />
+ <parameter name="timeStamp" value="1779174591874" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface
@@ -240,6 +261,31 @@
  <interface
    name="pwm_mtr_fault_n"
    internal="ip_pwm_motor_0.conduit_end_5"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="adc_convst"
+   internal="ip_ltc2308_adc_0.conduit_end"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="adc_sck"
+   internal="ip_ltc2308_adc_0.conduit_end_1"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="adc_sdo"
+   internal="ip_ltc2308_adc_0.conduit_end_2"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="adc_sdi"
+   internal="ip_ltc2308_adc_0.conduit_end_3"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="ir_led_on"
+   internal="ip_ltc2308_adc_0.conduit_end_4"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk_0">
@@ -354,7 +400,7 @@
   <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
   <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='sdram.s1' start='0x2000000' end='0x4000000' /><slave name='onchip_memory.s1' start='0x4001000' end='0x4002000' /><slave name='nios2_processor.jtag_debug_module' start='0x4002800' end='0x4003000' /></address-map>]]></parameter>
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='ip_pwm_motor_0.avalon_slave_0' start='0x0' end='0x20' /><slave name='sdram.s1' start='0x2000000' end='0x4000000' /><slave name='onchip_memory.s1' start='0x4001000' end='0x4002000' /><slave name='nios2_processor.jtag_debug_module' start='0x4002800' end='0x4003000' /><slave name='switches.s1' start='0x4003000' end='0x4003010' /><slave name='LEDS.s1' start='0x4003010' end='0x4003020' /><slave name='jtag_uart.avalon_jtag_slave' start='0x4003020' end='0x4003028' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='ip_pwm_motor_0.avalon_slave_0' start='0x0' end='0x20' /><slave name='ip_ltc2308_adc_0.avalon_slave_0' start='0x40' end='0x80' /><slave name='sdram.s1' start='0x2000000' end='0x4000000' /><slave name='onchip_memory.s1' start='0x4001000' end='0x4002000' /><slave name='nios2_processor.jtag_debug_module' start='0x4002800' end='0x4003000' /><slave name='switches.s1' start='0x4003000' end='0x4003010' /><slave name='LEDS.s1' start='0x4003010' end='0x4003020' /><slave name='jtag_uart.avalon_jtag_slave' start='0x4003020' end='0x4003028' /></address-map>]]></parameter>
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="deviceFamilyName" value="Cyclone IV E" />
   <parameter name="internalIrqMaskSystemInfo" value="0" />
@@ -489,6 +535,13 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
  <module kind="ip_pwm_motor" version="1.0" enabled="1" name="ip_pwm_motor_0">
+  <parameter name="AUTO_CLOCK_SINK_CLOCK_RATE" value="50000000" />
+ </module>
+ <module
+   kind="ip_ltc2308_adc"
+   version="1.0"
+   enabled="1"
+   name="ip_ltc2308_adc_0">
   <parameter name="AUTO_CLOCK_SINK_CLOCK_RATE" value="50000000" />
  </module>
  <connection
@@ -681,6 +734,30 @@
    version="13.0"
    start="clk_0.clk_reset"
    end="ip_pwm_motor_0.reset_sink" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="nios2_processor.data_master"
+   end="ip_ltc2308_adc_0.avalon_slave_0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0040" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clocks.sys_clk"
+   end="ip_ltc2308_adc_0.clock_sink" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="nios2_processor.jtag_debug_module_reset"
+   end="ip_ltc2308_adc_0.reset_sink" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk_0.clk_reset"
+   end="ip_ltc2308_adc_0.reset_sink" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
