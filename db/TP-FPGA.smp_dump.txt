@@ -1,5 +1,5 @@
 
-State Machine - |Top_VHDL|system:u0|ip_ltc2308_adc:ip_ltc2308_adc_0|state
+State Machine - |Top_VHDL|system:u0|ip_ltc2308_adc:ip_ltc2308_adc_0|ltc2308_adc_core:adc_core_inst|state
 Name state.ST_FRAME_DONE state.ST_SCK_HIGH state.ST_SCK_LOW state.ST_CONV_LOW state.ST_CONV_HIGH state.ST_IDLE 
 state.ST_IDLE 0 0 0 0 0 0 
 state.ST_CONV_HIGH 0 0 0 0 1 1 

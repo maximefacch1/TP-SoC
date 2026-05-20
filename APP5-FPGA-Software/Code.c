@@ -1,10 +1,22 @@
-#define LED_BASE_ADDR 0x04003010u
-#define PWM_BASE_ADDR 0x00000000u
-#define ADC_BASE_ADDR 0x00000040u
+#include "system.h"
+#include "io.h"
 
-#define LED ((volatile unsigned int *)LED_BASE_ADDR)
-#define PWM ((volatile unsigned int *)PWM_BASE_ADDR)
-#define ADC ((volatile unsigned int *)ADC_BASE_ADDR)
+/*
+ * Correction du linker BSP :
+ * Les IP custom n'ont pas de driver HAL dédié.
+ * Le BSP appelle __alt_invalid() pour ces périphériques.
+ * On la définit vide car on pilote les IP directement avec IORD/IOWR.
+ */
+void __alt_invalid(void)
+{
+}
+
+/*
+ * Bases HAL générées dans system.h
+ */
+#define PWM_BASE        IP_PWM_MOTOR_0_BASE
+#define ADC_BASE        IP_LTC2308_ADC_0_BASE
+#define LED_BASE        LEDS_BASE
 
 /*
  * Registres IP PWM
@@ -23,6 +35,13 @@
 #define ADC_REG_DATA        2
 #define ADC_REG_STATUS      3
 #define ADC_REG_CH0         4
+#define ADC_REG_CH1         5
+#define ADC_REG_CH2         6
+#define ADC_REG_CH3         7
+#define ADC_REG_CH4         8
+#define ADC_REG_CH5         9
+#define ADC_REG_CH6         10
+#define ADC_REG_CH7         11
 
 /*
  * Bits CONTROL PWM
@@ -53,11 +72,11 @@
 #define LINE_THRESHOLD      1700
 
 /*
- * Vitesse validée expérimentalement.
+ * Vitesse demandée.
  * PERIOD PWM = 3125
- * 2500 / 3125 ≈ 80 %
+ * 2250 / 3125 ≈ 72 %
  */
-#define DUTY_RUN            2150
+#define DUTY_RUN            2250
 
 static void delay(volatile unsigned int count)
 {
@@ -71,62 +90,72 @@ static unsigned int adc_read_channel(unsigned int channel)
     volatile unsigned int timeout;
     unsigned int value;
 
-    ADC[ADC_REG_CHANNEL] = channel & 0x7;
-    ADC[ADC_REG_CONTROL] = ADC_CTRL_START | ADC_CTRL_IR_ON;
+    IOWR(ADC_BASE, ADC_REG_CHANNEL, channel & 0x7);
 
+    /*
+     * Lance une conversion tout en gardant les LEDs IR activées.
+     */
+    IOWR(ADC_BASE, ADC_REG_CONTROL, ADC_CTRL_START | ADC_CTRL_IR_ON);
+
+    /*
+     * Avec la nouvelle IP, DONE est une impulsion courte.
+     * Il est plus fiable d'attendre que BUSY retombe à 0.
+     */
     timeout = 1000000;
 
-    while (((ADC[ADC_REG_STATUS] & ADC_STATUS_DONE) == 0) && timeout > 0) {
+    while ((IORD(ADC_BASE, ADC_REG_STATUS) & ADC_STATUS_BUSY) && timeout > 0) {
         timeout--;
     }
 
-    value = ADC[ADC_REG_DATA] & 0x0FFF;
+    value = IORD(ADC_BASE, ADC_REG_DATA) & 0x0FFF;
 
     return value;
 }
 
 static void motor_stop(void)
 {
-    PWM[PWM_REG_CONTROL] = 0x00;
-    PWM[PWM_REG_DUTY_LEFT] = 0;
-    PWM[PWM_REG_DUTY_RIGHT] = 0;
+    IOWR(PWM_BASE, PWM_REG_CONTROL, 0x00);
+    IOWR(PWM_BASE, PWM_REG_DUTY_LEFT, 0);
+    IOWR(PWM_BASE, PWM_REG_DUTY_RIGHT, 0);
 }
 
 static void motor_forward(unsigned int duty_left, unsigned int duty_right)
 {
-    PWM[PWM_REG_DUTY_LEFT] = duty_left;
-    PWM[PWM_REG_DUTY_RIGHT] = duty_right;
+    IOWR(PWM_BASE, PWM_REG_DUTY_LEFT, duty_left);
+    IOWR(PWM_BASE, PWM_REG_DUTY_RIGHT, duty_right);
 
     /*
      * Avant réel :
      * moteur gauche inversé mécaniquement,
      * moteur droit normal.
      */
-    PWM[PWM_REG_CONTROL] = CTRL_ENABLE | CTRL_SLEEP_N | CTRL_LEFT_REV;
+    IOWR(PWM_BASE, PWM_REG_CONTROL, CTRL_ENABLE | CTRL_SLEEP_N | CTRL_LEFT_REV);
 }
 
-static void turn_right(void)
+static void physical_turn_left(void)
 {
     /*
-     * Pour tourner à gauche :
+     * Tourne réellement à gauche :
      * roue gauche arrêtée,
      * roue droite avance.
      */
-    PWM[PWM_REG_DUTY_LEFT] = 0;
-    PWM[PWM_REG_DUTY_RIGHT] = DUTY_RUN;
-    PWM[PWM_REG_CONTROL] = CTRL_ENABLE | CTRL_SLEEP_N;
+    IOWR(PWM_BASE, PWM_REG_DUTY_LEFT, 0);
+    IOWR(PWM_BASE, PWM_REG_DUTY_RIGHT, DUTY_RUN);
+
+    IOWR(PWM_BASE, PWM_REG_CONTROL, CTRL_ENABLE | CTRL_SLEEP_N);
 }
 
-static void turn_left(void)
+static void physical_turn_right(void)
 {
     /*
-     * Pour tourner à droite :
+     * Tourne réellement à droite :
      * roue gauche avance,
      * roue droite arrêtée.
      */
-    PWM[PWM_REG_DUTY_LEFT] = DUTY_RUN;
-    PWM[PWM_REG_DUTY_RIGHT] = 0;
-    PWM[PWM_REG_CONTROL] = CTRL_ENABLE | CTRL_SLEEP_N | CTRL_LEFT_REV;
+    IOWR(PWM_BASE, PWM_REG_DUTY_LEFT, DUTY_RUN);
+    IOWR(PWM_BASE, PWM_REG_DUTY_RIGHT, 0);
+
+    IOWR(PWM_BASE, PWM_REG_CONTROL, CTRL_ENABLE | CTRL_SLEEP_N | CTRL_LEFT_REV);
 }
 
 int main(void)
@@ -143,13 +172,19 @@ int main(void)
 
     /*
      * Active les LEDs IR.
-     * Avec ton top de debug, LED7 affiche aussi IR_LED_ON.
+     * Dans ton top de debug, LED7 affiche IR_LED_ON.
      */
-    ADC[ADC_REG_CONTROL] = ADC_CTRL_IR_ON;
+    IOWR(ADC_BASE, ADC_REG_CONTROL, ADC_CTRL_IR_ON);
 
     while (1) {
         led_pattern = 0;
 
+        /*
+         * Lecture des capteurs :
+         *
+         * CH0 CH1 CH2 CH3 CH4 CH5 CH6
+         * gauche       centre       droite
+         */
         for (i = 0; i < 7; i++) {
             sensors[i] = adc_read_channel(i);
 
@@ -159,13 +194,10 @@ int main(void)
         }
 
         /*
-         * Affichage capteurs :
-         * LED0 = CH0
-         * LED1 = CH1
-         * ...
-         * LED6 = CH6
+         * LED0 à LED6 = détection des capteurs.
+         * LED7 reste pilotée par le top VHDL avec IR_LED_ON.
          */
-        LED[0] = led_pattern & 0x7F;
+        IOWR(LED_BASE, 0, led_pattern & 0x7F);
 
         left_detected =
             ((led_pattern & 0x01) != 0) ||
@@ -181,21 +213,20 @@ int main(void)
             ((led_pattern & 0x40) != 0);
 
         /*
-         * Logique simple de suivi de ligne :
+         * Suivi de ligne simple.
          *
-         * CH3 noir              -> avancer
-         * CH0/CH1/CH2 noir      -> tourner gauche
-         * CH4/CH5/CH6 noir      -> tourner droite
-         * aucun capteur noir    -> stop
+         * Inversion gauche/droite conservée :
+         * - ligne détectée à gauche  -> correction physique à droite
+         * - ligne détectée à droite  -> correction physique à gauche
          */
         if (center_detected) {
             motor_forward(DUTY_RUN, DUTY_RUN);
         }
         else if (left_detected) {
-            turn_left();
+            physical_turn_right();
         }
         else if (right_detected) {
-            turn_right();
+            physical_turn_left();
         }
         else {
             motor_stop();

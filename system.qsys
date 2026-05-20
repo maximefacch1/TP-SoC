@@ -33,19 +33,6 @@
          type = "String";
       }
    }
-   element ip_pwm_motor_0.avalon_slave_0
-   {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "0";
-         type = "String";
-      }
-   }
    element ip_ltc2308_adc_0.avalon_slave_0
    {
       datum _lockedAddress
@@ -56,6 +43,19 @@
       datum baseAddress
       {
          value = "64";
+         type = "String";
+      }
+   }
+   element ip_pwm_motor_0.avalon_slave_0
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "0";
          type = "String";
       }
    }
@@ -133,32 +133,6 @@
          type = "int";
       }
    }
-   element sdram.s1
-   {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "33554432";
-         type = "String";
-      }
-   }
-   element onchip_memory.s1
-   {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "67112960";
-         type = "String";
-      }
-   }
    element LEDS.s1
    {
       datum _lockedAddress
@@ -172,6 +146,19 @@
          type = "String";
       }
    }
+   element sdram.s1
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "33554432";
+         type = "String";
+      }
+   }
    element switches.s1
    {
       datum _lockedAddress
@@ -182,6 +169,19 @@
       datum baseAddress
       {
          value = "67121152";
+         type = "String";
+      }
+   }
+   element onchip_memory.s1
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "67112960";
          type = "String";
       }
    }
@@ -216,7 +216,7 @@
  <parameter name="projectName" value="TP-FPGA.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1779174591874" />
+ <parameter name="timeStamp" value="1779279015878" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface

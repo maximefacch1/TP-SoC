@@ -3,21 +3,12 @@ use ieee.std_logic_1164.all;
 
 entity Top_VHDL is
     port (
-        --------------------------------------------------------------------
-        -- CLOCK
-        --------------------------------------------------------------------
         CLOCK_50 : in std_logic;
 
-        --------------------------------------------------------------------
-        -- LED / KEY / SWITCH
-        --------------------------------------------------------------------
         LED : out std_logic_vector(7 downto 0);
         KEY : in  std_logic_vector(1 downto 0);
         SW  : in  std_logic_vector(3 downto 0);
 
-        --------------------------------------------------------------------
-        -- SDRAM DE0-Nano
-        --------------------------------------------------------------------
         DRAM_ADDR  : out   std_logic_vector(12 downto 0);
         DRAM_BA    : out   std_logic_vector(1 downto 0);
         DRAM_CAS_N : out   std_logic;
@@ -29,21 +20,12 @@ entity Top_VHDL is
         DRAM_RAS_N : out   std_logic;
         DRAM_WE_N  : out   std_logic;
 
-        --------------------------------------------------------------------
-        -- GPIO0 : CuteCar
-        --------------------------------------------------------------------
         GPIO_0_IN : in    std_logic_vector(1 downto 0);
         GPIO_0    : inout std_logic_vector(33 downto 0);
 
-        --------------------------------------------------------------------
-        -- GPIO1 : non utilisé ici
-        --------------------------------------------------------------------
         GPIO_1_IN : in    std_logic_vector(1 downto 0);
         GPIO_1    : inout std_logic_vector(33 downto 0);
 
-        --------------------------------------------------------------------
-        -- Périphériques DE0-Nano non utilisés ici
-        --------------------------------------------------------------------
         I2C_SCLK      : inout std_logic;
         I2C_SDAT      : inout std_logic;
         G_SENSOR_CS_N : out   std_logic;
@@ -57,106 +39,62 @@ end entity Top_VHDL;
 
 architecture rtl of Top_VHDL is
 
-    --------------------------------------------------------------------
-    -- Qsys system généré
-    --------------------------------------------------------------------
     component system is
         port (
-            leds_export            : out   std_logic_vector(7 downto 0);
-            switches_export        : in    std_logic_vector(7 downto 0) := (others => 'X');
+            leds_export     : out std_logic_vector(7 downto 0);
+            switches_export : in  std_logic_vector(7 downto 0);
 
-            clk_clk                : in    std_logic := 'X';
-            reset_reset_n          : in    std_logic := 'X';
+            clk_clk       : in std_logic;
+            reset_reset_n : in std_logic;
 
-            sdram_wire_addr        : out   std_logic_vector(12 downto 0);
-            sdram_wire_ba          : out   std_logic_vector(1 downto 0);
-            sdram_wire_cas_n       : out   std_logic;
-            sdram_wire_cke         : out   std_logic;
-            sdram_wire_cs_n        : out   std_logic;
-            sdram_wire_dq          : inout std_logic_vector(15 downto 0) := (others => 'X');
-            sdram_wire_dqm         : out   std_logic_vector(1 downto 0);
-            sdram_wire_ras_n       : out   std_logic;
-            sdram_wire_we_n        : out   std_logic;
-            sdram_clk_clk          : out   std_logic;
+            sdram_wire_addr  : out   std_logic_vector(12 downto 0);
+            sdram_wire_ba    : out   std_logic_vector(1 downto 0);
+            sdram_wire_cas_n : out   std_logic;
+            sdram_wire_cke   : out   std_logic;
+            sdram_wire_cs_n  : out   std_logic;
+            sdram_wire_dq    : inout std_logic_vector(15 downto 0);
+            sdram_wire_dqm   : out   std_logic_vector(1 downto 0);
+            sdram_wire_ras_n : out   std_logic;
+            sdram_wire_we_n  : out   std_logic;
+            sdram_clk_clk    : out   std_logic;
 
-            pwm_mtrr_p_export      : out   std_logic;
-            pwm_mtrr_n_export      : out   std_logic;
-            pwm_mtrl_p_export      : out   std_logic;
-            pwm_mtrl_n_export      : out   std_logic;
-            pwm_mtr_sleep_n_export : out   std_logic;
-            pwm_mtr_fault_n_export : in    std_logic := 'X';
+            pwm_mtrr_p_export      : out std_logic;
+            pwm_mtrr_n_export      : out std_logic;
+            pwm_mtrl_p_export      : out std_logic;
+            pwm_mtrl_n_export      : out std_logic;
+            pwm_mtr_sleep_n_export : out std_logic;
+            pwm_mtr_fault_n_export : in  std_logic;
 
-            adc_convst_export      : out   std_logic;
-            adc_sck_export         : out   std_logic;
-            adc_sdo_export         : in    std_logic := 'X';
-            adc_sdi_export         : out   std_logic;
-            ir_led_on_export       : out   std_logic
+            adc_convst_export : out std_logic;
+            adc_sck_export    : out std_logic;
+            adc_sdo_export    : in  std_logic;
+            adc_sdi_export    : out std_logic;
+            ir_led_on_export  : out std_logic
         );
-    end component system;
+    end component;
 
-    --------------------------------------------------------------------
-    -- Signaux internes
-    --------------------------------------------------------------------
     signal switches_qsys : std_logic_vector(7 downto 0);
-
-    -- Debug LED :
-    -- Les LEDs 0 à 6 restent pilotées par Qsys.
-    -- LED(7) affiche directement ir_led_on_export.
     signal led_qsys      : std_logic_vector(7 downto 0);
     signal ir_led_on_sig : std_logic;
 
 begin
 
-    --------------------------------------------------------------------
-    -- Adaptation des switches
-    -- Qsys attend 8 bits, mais la DE0-Nano a 4 switches.
-    --------------------------------------------------------------------
     switches_qsys <= "0000" & SW;
 
-    --------------------------------------------------------------------
-    -- Debug de IR_LED_ON
-    --------------------------------------------------------------------
     LED(6 downto 0) <= led_qsys(6 downto 0);
     LED(7)          <= ir_led_on_sig;
 
-    --------------------------------------------------------------------
-    -- Désactivation propre des périphériques non utilisés
-    --------------------------------------------------------------------
     I2C_SCLK <= 'Z';
     I2C_SDAT <= 'Z';
 
     G_SENSOR_CS_N <= '1';
 
-    --------------------------------------------------------------------
-    -- ADC interne DE0-Nano non utilisé.
-    -- Attention : ceci est différent de l'ADC CuteCar branché sur GPIO0.
-    --------------------------------------------------------------------
     ADC_CS_N  <= '1';
     ADC_SADDR <= '0';
     ADC_SCLK  <= '0';
 
-    --------------------------------------------------------------------
-    -- GPIO non utilisés en haute impédance
-    --
-    -- GPIO_0 utilisés par CuteCar :
-    --
-    -- Moteurs :
-    -- GPIO_0(2)  = MTRR_N
-    -- GPIO_0(3)  = MTRR_P
-    -- GPIO_0(4)  = MTRL_P
-    -- GPIO_0(5)  = MTRL_N
-    -- GPIO_0(6)  = MTR_Sleep_n
-    -- GPIO_0(7)  = MTR_Fault_n
-    --
-    -- ADC capteurs :
-    -- GPIO_0(8)  = ADC_CONVST
-    -- GPIO_0(9)  = ADC_SCK
-    -- GPIO_0(10) = ADC_SDO
-    -- GPIO_0(11) = ADC_SDI
-    -- GPIO_0(32) = IR_LED_ON
-    --------------------------------------------------------------------
-    GPIO_0(0)  <= 'Z';
-    GPIO_0(1)  <= 'Z';
+    GPIO_0(0) <= 'Z';
+    GPIO_0(1) <= 'Z';
 
     GPIO_0(12) <= 'Z';
     GPIO_0(13) <= 'Z';
@@ -178,39 +116,21 @@ begin
     GPIO_0(29) <= 'Z';
     GPIO_0(30) <= 'Z';
     GPIO_0(31) <= 'Z';
-    GPIO_0(33) <= '0'; -- VCC3P3_PWRON_n actif bas : active le 3.3 V SCD
+
+    GPIO_0(33) <= '0';
 
     GPIO_1 <= (others => 'Z');
 
-    --------------------------------------------------------------------
-    -- Sortie physique IR_LED_ON
-    -- Le même signal est envoyé :
-    -- - vers GPIO_0(32), donc la carte CuteCar ;
-    -- - vers LED(7), pour debug visuel.
-    --------------------------------------------------------------------
     GPIO_0(32) <= ir_led_on_sig;
 
-    --------------------------------------------------------------------
-    -- Instanciation du système Qsys
-    --------------------------------------------------------------------
-    u0 : component system
+    u0 : system
         port map (
-            ----------------------------------------------------------------
-            -- Debug simple
-            ----------------------------------------------------------------
             leds_export     => led_qsys,
             switches_export => switches_qsys,
 
-            ----------------------------------------------------------------
-            -- Clock / reset
-            -- KEY(0) est actif bas sur DE0-Nano.
-            ----------------------------------------------------------------
             clk_clk       => CLOCK_50,
             reset_reset_n => KEY(0),
 
-            ----------------------------------------------------------------
-            -- SDRAM
-            ----------------------------------------------------------------
             sdram_wire_addr  => DRAM_ADDR,
             sdram_wire_ba    => DRAM_BA,
             sdram_wire_cas_n => DRAM_CAS_N,
@@ -222,9 +142,6 @@ begin
             sdram_wire_we_n  => DRAM_WE_N,
             sdram_clk_clk    => DRAM_CLK,
 
-            ----------------------------------------------------------------
-            -- IP PWM moteur CuteCar sur GPIO0
-            ----------------------------------------------------------------
             pwm_mtrr_p_export      => GPIO_0(3),
             pwm_mtrr_n_export      => GPIO_0(2),
             pwm_mtrl_p_export      => GPIO_0(4),
@@ -232,12 +149,9 @@ begin
             pwm_mtr_sleep_n_export => GPIO_0(6),
             pwm_mtr_fault_n_export => GPIO_0(7),
 
-            ----------------------------------------------------------------
-            -- IP ADC LTC2308 CuteCar sur GPIO0
-            ----------------------------------------------------------------
             adc_convst_export => GPIO_0(8),
             adc_sck_export    => GPIO_0(9),
-				adc_sdo_export    => GPIO_0(10),
+            adc_sdo_export    => GPIO_0(10),
             adc_sdi_export    => GPIO_0(11),
             ir_led_on_export  => ir_led_on_sig
         );

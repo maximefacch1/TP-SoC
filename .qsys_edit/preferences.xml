@@ -14,8 +14,7 @@
    <frequency preferredWidth="404" />
   </columns>
  </clocktable>
- <library
-   expandedCategories="Library/University Program/Generic IO,Library,Library/University Program,Project,Library/DSP,Library/DSP/Video and Image Processing,Project/MyIP" />
+ <library expandedCategories="Library,Project/MyIP,Project" />
  <window width="1920" height="1032" x="0" y="0" />
  <generation path="nios_system" synthesis="VHDL" />
  <hdlexample language="VHDL" />
